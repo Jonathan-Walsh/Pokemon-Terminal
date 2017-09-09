@@ -1,11 +1,11 @@
-bulbasaur   0.61604    grass     poison
-ivysaur     0.462721   grass     poison
+bulbasaur   0.61604    grass     poison    ivysaur
+ivysaur     0.462721   grass     poison    venusaur
 venusaur    0.5451     grass     poison
-charmander  0.724984   fire
-charmeleon  0.491232   fire
+charmander  0.724984   fire		   charmeleon
+charmeleon  0.491232   fire   		   charizard
 charizard   0.601881   fire      flying
-squirtle    0.708672   water
-wartortle   0.748101   water
+squirtle    0.708672   water               wartortle
+wartortle   0.748101   water               blastoise
 blastoise   0.64938    water
 caterpie    0.718227   bug
 metapod     0.621901   bug

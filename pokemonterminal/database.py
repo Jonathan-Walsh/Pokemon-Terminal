@@ -14,9 +14,10 @@ class Pokemon:
     __pkmn_type = ""
     __pkmn_type_secondary = ""
     __dark_threshold = 0.5
+    __evolution = ""
 
     def __init__(self, identifier, name, region, path, pkmn_type,
-                 pkmn_type_secondary, dark_threshold):
+                 pkmn_type_secondary, dark_threshold, evolution):
         self.__id = identifier
         self.__name = name
         self.__region = region
@@ -24,7 +25,8 @@ class Pokemon:
         self.__dark_threshold = float(dark_threshold)
         self.__pkmn_type = pkmn_type
         self.__pkmn_type_secondary = pkmn_type_secondary
-
+        self.__evolution = evolution
+ 
     def get_id(self):
         # Pokemon from folder 'Extra' have no ID.
         return self.__id or "---"
@@ -46,6 +48,9 @@ class Pokemon:
 
     def get_dark_threshold(self):
         return self.__dark_threshold
+
+    def get_evolution(self):
+        return self.__evolution
 
     def is_extra(self):
         return self.__id is None
@@ -214,6 +219,10 @@ class Database:
         return [pokemon for pokemon in self.__pokemon_list
                 if infix in str(pokemon.get_name())]
 
+    def __is_type(self, possibleType):
+        """Determine if a string is a type"""
+        return possibleType in self.__POKEMON_TYPES
+    
     def __load_data(self):
         # Load all the Pokemon data. This does not include the 'Extra' Pokemon.
         with open(self.directory + "/./Data/pokemon.txt", 'r') as data_file:
@@ -224,13 +233,22 @@ class Database:
                 name = pkmn_data[0]
                 dark_threshold = pkmn_data[1]
                 pkmn_type = pkmn_data[2]
-                pkmn_type_snd = pkmn_data[3] if len(pkmn_data) >= 4 else ""
+                if len(pkmn_data) >= 4:
+                    if self.__is_type(pkmn_data[3]):
+                        pkmn_type_snd = pkmn_data[3]
+                        evolution = pkmn_data[4] if len(pkmn_data) >= 5 else ""
+                    else:
+                        pkmn_type_snd = ""
+                        evolution = pkmn_data[3]
+                else:
+                    pkmn_type_snd = ""
+                    evolution = ""
                 identifier = '{:03}'.format(identifier)
                 region = self.__determine_region(identifier)
                 path = self.__determine_folder(identifier) + "/" + identifier\
                     + ".jpg"
                 pokemon = Pokemon(identifier, name, region, path, pkmn_type,
-                                  pkmn_type_snd, dark_threshold)
+                                  pkmn_type_snd, dark_threshold,evolution)
                 self.__pokemon_type_dictionary[pkmn_type].append(pokemon)
                 if pkmn_type_snd != '':
                     self.__pokemon_type_dictionary[pkmn_type_snd]\
@@ -250,9 +268,10 @@ class Database:
                     pokemon = Pokemon(None, name, father.get_region(),
                                       path, father.get_pkmn_type(),
                                       father.get_pkmn_type_secondary(),
-                                      father.get_dark_threshold())
+                                      father.get_dark_threshold(),
+				      father.get_evolution())
                 else:
-                    pokemon = Pokemon(None, name, None, path, None, None, 0.5)
+                    pokemon = Pokemon(None, name, None, path, None, None, 0.5, None)
                 if name in self.__pokemon_dictionary:
                     raise Exception("Duplicate names detected.\nThe name of "
                                     + "the file " + str(name) + ".jpg in the "

@@ -31,7 +31,6 @@ def __linux_create_wallpaper_script(image_file_path):
         print("Window manager not supported ")
         exit(1)
 
-
 def clear_terminal():
     adapter = identify()
     adapter.clear()

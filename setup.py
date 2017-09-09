@@ -4,7 +4,6 @@
 import os
 from setuptools import setup, find_packages
 
-
 def find_data(relpath, folder):
     dir_content = []
     path = os.path.join(relpath, folder)
@@ -28,7 +27,7 @@ def package_data(relpath, folders):
 
 setup(
     name="pokemon-terminal",
-    version="0.0.1",
+    version="0.0.2",
 
     description="Pokemon terminal themes.",
     long_description="""

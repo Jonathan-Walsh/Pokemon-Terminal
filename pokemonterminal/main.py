@@ -5,10 +5,12 @@
 import random
 import sys
 import time
+import os
 
 from pokemonterminal import scripter
 from pokemonterminal.database import Database
 
+directory = os.path.dirname(os.path.realpath(__file__))
 
 def print_list(list_of_items):
     """Print all the items in a list. Used for printing each Pokemon from a particular region."""
@@ -112,12 +114,38 @@ def slideshow(db, start, end, seconds="0.25", rand=False):
         print("Program was terminated.")
         sys.exit()
 
+def update_current(pokemon):
+    """Update file that stores name of current pokemon"""
+    with open(directory + "/./Data/current.txt",'w') as file:
+        file.write(pokemon)
+
+def evolve(db):
+    """Change background to evolution of current pokemon"""
+    file =  open(directory + "/./Data/current.txt", 'r')
+    lines = file.readlines()
+    file.close()
+    if (len(lines) == 0):
+        print("No current Pokemon saved. Change background and try again")
+    else:
+        name = lines[0].strip()
+        if name in db:
+            pokemon = db.get_pokemon(name)
+            evo = pokemon.get_evolution()
+            if (evo != ""):
+                change_terminal_background(db, evo)
+                update_current(evo)
+            else:
+                print("Pokemon is already fully evolved!")
+        else:
+            print("Current saved Pokemon is invalid. Change background and try again")
+            
 
 def change_terminal_background(db, arg):  # arg is a pokemon_name
     """Change the terminal background to the specified Pokemon, if it exists."""
     if arg in db:
         pokemon = db.get_pokemon(arg)
         scripter.change_terminal(pokemon.get_path())
+        update_current(arg)
     else:  # If not found in the database, try to give suggestions.
         suggestions = db.names_with_infix(arg)
         if len(suggestions) == 0:
@@ -129,6 +157,7 @@ def change_terminal_background(db, arg):  # arg is a pokemon_name
             if len(suggestions) > 1:
                 print("Other suggestions:")
                 print_columns(suggestions[1:])
+            update_current(pokemon.get_name())
 
 
 def change_wallpaper(db, arg):  # arg is a pokemon_name
@@ -285,6 +314,8 @@ def single_argument_handler(arg, escape_code):
         slideshow(db, 650, 720, rand=arg.startswith("rnd"))
     elif arg == "?":
         print("This function is deprecated.")
+    elif arg == "evolve":
+        evolve(db)
     elif escape_code:
         change_wallpaper(db, arg)
     else:

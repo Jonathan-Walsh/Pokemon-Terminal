@@ -130,10 +130,11 @@ def evolve(db):
         name = lines[0].strip()
         if name in db:
             pokemon = db.get_pokemon(name)
-            evo = pokemon.get_evolution()
-            if (evo != ""):
-                change_terminal_background(db, evo)
-                update_current(evo)
+            evos = pokemon.get_evolutions()
+            selectedEvo = random.choice(evos)
+            if (selectedEvo != ""):
+                change_terminal_background(db, selectedEvo)
+                update_current(selectedEvo)
             else:
                 print("Pokemon is already fully evolved!")
         else:

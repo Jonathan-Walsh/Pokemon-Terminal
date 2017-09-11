@@ -2,7 +2,7 @@
 
 import os
 import random
-
+import csv
 
 class Pokemon:
     """Class to represent pokemons"""
@@ -14,10 +14,10 @@ class Pokemon:
     __pkmn_type = ""
     __pkmn_type_secondary = ""
     __dark_threshold = 0.5
-    __evolution = ""
+    __evolutions = []
 
     def __init__(self, identifier, name, region, path, pkmn_type,
-                 pkmn_type_secondary, dark_threshold, evolution):
+                 pkmn_type_secondary, dark_threshold, evolutions):
         self.__id = identifier
         self.__name = name
         self.__region = region
@@ -25,7 +25,7 @@ class Pokemon:
         self.__dark_threshold = float(dark_threshold)
         self.__pkmn_type = pkmn_type
         self.__pkmn_type_secondary = pkmn_type_secondary
-        self.__evolution = evolution
+        self.__evolutions = evolutions
  
     def get_id(self):
         # Pokemon from folder 'Extra' have no ID.
@@ -49,8 +49,8 @@ class Pokemon:
     def get_dark_threshold(self):
         return self.__dark_threshold
 
-    def get_evolution(self):
-        return self.__evolution
+    def get_evolutions(self):
+        return self.__evolutions
 
     def is_extra(self):
         return self.__id is None
@@ -218,37 +218,28 @@ class Database:
         # Return Pokemon who's names contains the specified infix.
         return [pokemon for pokemon in self.__pokemon_list
                 if infix in str(pokemon.get_name())]
-
-    def __is_type(self, possibleType):
-        """Determine if a string is a type"""
-        return possibleType in self.__POKEMON_TYPES
     
+    def parse_evos(self, evosStr):
+        return evosStr.split(',')
+
     def __load_data(self):
         # Load all the Pokemon data. This does not include the 'Extra' Pokemon.
-        with open(self.directory + "/./Data/pokemon.txt", 'r') as data_file:
+        with open(self.directory + "/./Data/pokemon.csv", 'r') as csvfile:
             # Load everything but the Pokemon from the 'Extra' folder.
-            for i, line in enumerate(data_file):
-                identifier = int(i) + 1
-                pkmn_data = line.strip().split()
-                name = pkmn_data[0]
-                dark_threshold = pkmn_data[1]
-                pkmn_type = pkmn_data[2]
-                if len(pkmn_data) >= 4:
-                    if self.__is_type(pkmn_data[3]):
-                        pkmn_type_snd = pkmn_data[3]
-                        evolution = pkmn_data[4] if len(pkmn_data) >= 5 else ""
-                    else:
-                        pkmn_type_snd = ""
-                        evolution = pkmn_data[3]
-                else:
-                    pkmn_type_snd = ""
-                    evolution = ""
+            reader = csv.DictReader(csvfile)
+            for row in reader:
+                identifier = int(row["Identifier"])
+                name = row["Name"]
+                dark_threshold = row["Dark Threshold"]
+                pkmn_type = row["Type"]
+                pkmn_type_snd = row["Secondary Type"]
+                evolutions = self.parse_evos(row["Evolutions"])
                 identifier = '{:03}'.format(identifier)
                 region = self.__determine_region(identifier)
                 path = self.__determine_folder(identifier) + "/" + identifier\
                     + ".jpg"
                 pokemon = Pokemon(identifier, name, region, path, pkmn_type,
-                                  pkmn_type_snd, dark_threshold,evolution)
+                                  pkmn_type_snd, dark_threshold,evolutions)
                 self.__pokemon_type_dictionary[pkmn_type].append(pokemon)
                 if pkmn_type_snd != '':
                     self.__pokemon_type_dictionary[pkmn_type_snd]\
@@ -269,7 +260,7 @@ class Database:
                                       path, father.get_pkmn_type(),
                                       father.get_pkmn_type_secondary(),
                                       father.get_dark_threshold(),
-				      father.get_evolution())
+				      father.get_evolutions())
                 else:
                     pokemon = Pokemon(None, name, None, path, None, None, 0.5, None)
                 if name in self.__pokemon_dictionary:

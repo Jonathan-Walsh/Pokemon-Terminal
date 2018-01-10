@@ -9,6 +9,7 @@ import os
 
 from pokemonterminal import scripter
 from pokemonterminal.database import Database
+import pokemonterminal.party as party
 
 directory = os.path.dirname(os.path.realpath(__file__))
 
@@ -78,6 +79,10 @@ Other Parameters:
     slideshow-<region> [time]     -   Iterate through each Pokemon in the specified region. Optional time (in seconds) between Pokemon.
     rnd-slideshow [time]          -   Iterate through each Pokemon in a random order. Optional time (in seconds) between Pokemon.
     rnd-slideshow-<region> [time] -   Iterate through each Pokemon in the specified region in a random order. Optional time (in seconds) between Pokemon.
+    party			  -   List all of the pokemon in the current party
+    party-[add/remove] [name]     -   Add or remove a specific Pokemon from the party
+    party-show [time]             -   Iterate through each Pokemon in the party. Optional time (in seconds) betweeon Pokemon
+    rnd-party-show [time]         -   Same as party-show, but in a random order
     light                         -   Change the terminal background to a random light-colored Pokemon.
     dark                          -   Change the terminal background to a random dark-colored Pokemon.
     type [type]                   -   Random pokemon of [type] omit the type for a list of types.
@@ -214,6 +219,18 @@ def multiple_argument_handler(arg, arg2, escape_code):
                 change_wallpaper(db, target)
             else:
                 change_terminal_background(db, target)
+    elif "party-show" in arg:
+        try:
+            party.party_show(db, arg2, rand)
+        except ValueError:
+            print('The slideshow time needs to be a positive number'
+                  '\nType "help" to see all the commands.')
+    elif arg.lower() == 'party-add':
+        arg2 = arg2.lower()
+        party.party_add(arg2)
+    elif arg.lower() == 'party-remove':
+        arg2 = arg2.lower()
+        party.party_remove(arg2) 
     else:
         print('Invalid command specified.'
               '\nType "help" to see all the commands.')
@@ -317,6 +334,12 @@ def single_argument_handler(arg, escape_code):
         print("This function is deprecated.")
     elif arg == "evolve":
         evolve(db)
+    elif arg == "party":
+        party.party_print()
+    elif arg == "party-show":
+        party.party_show(db)
+    elif arg.endswith("party-show"):
+        party.party_show(db, rand=arg.startswith("rnd"))
     elif escape_code:
         change_wallpaper(db, arg)
     else:
